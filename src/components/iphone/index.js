@@ -7,8 +7,7 @@ import style_iphone from '../button/style_iphone';
 import $ from 'jquery';
 // import the Button component
 import Button from '../button';
-import * as config from '../../config.config.json';
-console.log(config);
+import * as config from '../../config.json';
 
 export default class Iphone extends Component {
 //var Iphone = React.createClass({
@@ -22,18 +21,41 @@ export default class Iphone extends Component {
 		this.setState({ display: true });
 	}
 
+	componentDidMount = () => {
+		this.fetchLocation();
+	}
+
+	fetchLocation = () => {
+		$.ajax({
+			url: "https://extreme-ip-lookup.com/json",
+			dataType: "jsonp",
+			success: this.fetchWeatherData,
+			error: this.locationError
+		});
+	}
+
 	// a call to fetch weather data via wunderground
-	fetchWeatherData = () => {
+	fetchWeatherData = (data) => {
 		// API URL with a structure of : ttp://api.wunderground.com/api/key/feature/q/country-code/city.json
-		var url = "https://api.darksky.net/forecast/${key}";
+		if(data.lat != this.state.lat || data.lon != this.state.lon) {
+			this.setState({
+				locate: data.city,
+				lat: data.lat,
+				lon: data.lon
+			});
+		}
+		var url = `https://api.darksky.net/forecast/${config.darksky_secret_key}/${this.state.lat},${this.state.lon}`;
 		$.ajax({
 			url: url,
+			data: {
+				lang: "en",
+				units: 'si'
+			},
 			dataType: "jsonp",
 			success : this.parseResponse,
-			error : function(req, err){ console.log('API call failed ' + err); }
+			error : this.weatherError
 		})
-		// once the data grabbed, hide the button
-		this.setState({ display: false });
+			// once the data grabbed, hide the button
 	}
 
 	// the main render method for the iphone component
@@ -51,22 +73,33 @@ export default class Iphone extends Component {
 				</div>
 				<div class={ style.details }></div>
 				<div class= { style_iphone.container }>
-					{ this.state.display ? <Button class={ style_iphone.button } clickFunction={ this.fetchWeatherData }/ > : null }
+					{ this.state.display ? <Button class={ style_iphone.button } clickFunction={ this.fetchLocation }/ > : <Button class={style_iphone.button} clickFunction={this.fetchLocation } text='refresh' /> }
 				</div>
 			</div>
 		);
 	}
 
+	parseLocation = (data) => {
+		console.log(data);
+	}
+
+	locationError = (req, err) => {
+		console.log("Error getting location");
+	}
+
+	weatherError = (req, err) => {
+		console.log(err);
+	}
+
 	parseResponse = (parsed_json) => {
-		var location = parsed_json['name'];
-		var temp_c = parsed_json['main']['temp'];
-		var conditions = parsed_json['weather']['0']['description'];
+		var temp_c = parsed_json['currently']['temperature'];
+		var conditions = parsed_json['currently']['summary'];
 
 		// set states for fields so they could be rendered later on
 		this.setState({
-			locate: location,
 			temp: temp_c,
-			cond : conditions
+			cond : conditions,
+			display: false,
 		});
 	}
 }

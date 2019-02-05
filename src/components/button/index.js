@@ -1,6 +1,6 @@
 // import preact
 import { h, render, Component } from 'preact';
-	
+
 export default class Button extends Component {
 
 	// rendering a function when the button is clicked
@@ -11,10 +11,11 @@ export default class Button extends Component {
 				console.log("passed something as 'clickFunction' that wasn't a function !");
 			}
 		}
+		let buttonText = this.props.text ? this.props.text : "Display Weather";
 		return (
 			<div>
 				<button onClick={cFunction}>
-					Display Weather
+					{buttonText}
 				</button>
 			</div>
 		);
