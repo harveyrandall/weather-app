@@ -1,0 +1,42 @@
+@import '~style/helpers';
+
+@navigation-height: 50px;
+
+.container {
+	display: flex;
+	flex-direction: column;
+	margin:0 auto;
+	background-color: rgba(0, 0, 0, 0.8);
+	color: #fff;
+	width: 414px;
+	height: 736px;
+}
+
+.navigation {
+	display:inline-flex;
+	flex-direction: row;
+	line-height: @navigation-height;
+	border-bottom: 1px solid white;
+}
+.navigation form {
+	width: 85%;
+}
+
+.navigation form input[type="text"] {
+	width:100%;
+	background: transparent;
+	color: white;
+	height: @navigation-height;
+	line-height: @navigation-height;
+	border: none;
+}
+
+.navigation .back {
+	width:15%;
+	text-align:center;
+	border-left: 1px solid white;
+	color:white;
+}
+.navigation .back:hover {
+	text-decoration: none;
+}
