@@ -75,7 +75,7 @@ export default class Home extends Component {
 			<div class={ style.container }>
 				{loading}
 				<div class={ style.header }>
-					<Link href={Search}>Search</Link>
+					<Link href="/search">Search</Link>
 					<div class={ style.city }>{ this.state.locate }</div>
 					<div class={ style.conditions }>{ this.state.cond }</div>
 					<span class={ tempStyles }>{ this.state.temp }</span>

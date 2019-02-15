@@ -1,4 +1,51 @@
 {
 	"darksky_secret_key": "248ace5a37fb36dea7b7794e5d8d2bba",
-	"google_maps_key": "AIzaSyBDRhEFgLvfj3y9LdNZhFf0IlBK16aWFSY"
+	"google_maps_key": "AIzaSyBDRhEFgLvfj3y9LdNZhFf0IlBK16aWFSY",
+	"default_search_results": [
+		{
+			"formatted_address": "London, UK",
+			"geometry": {
+				"location": {
+					"lat": 51.509865,
+					"lng": -0.118092
+				}
+			}
+		},
+		{
+			"formatted_address": "New York City, New York, USA",
+			"geometry": {
+				"location": {
+					"lat": 40.730610,
+					"lng": -73.935242
+				}
+			}
+		},
+		{
+			"formatted_address": "St Andrews Old Course, Fife, Scotland",
+			"geometry": {
+				"location": {
+					"lat": 56.3514844,
+					"lng": -2.8161478
+				}
+			}
+		},
+		{
+			"formatted_address": "Cypress Point, California, USA",
+			"geometry": {
+				"location": {
+					"lat": 36.576686,
+					"lng": -121.961444
+				}
+			}
+		},
+		{
+			"formatted_address": "Muirfield, East Lothian, Scotland",
+			"geometry": {
+				"location": {
+					"lat": 56.046385,
+					"lng": -2.826744
+				}
+			}
+		}
+	]
 }

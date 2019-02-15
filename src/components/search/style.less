@@ -40,3 +40,30 @@
 .navigation .back:hover {
 	text-decoration: none;
 }
+
+.results {
+	display: flex;
+	flex-direction: column;
+	background: white;
+	max-height: 718px;
+	overflow: scroll;
+}
+.result {
+	flex: 1;
+	padding:5% 5%;
+	border-bottom: 1px solid rgba(0,0,0,0.9);
+	color:black;
+	white-space: nowrap;
+	overflow: hidden;
+	text-overflow: ellipsis;
+	cursor: pointer;
+	font-size: 18px;
+	font-weight: bold;
+}
+.result h5 {
+	margin:0px;
+	white-space: nowrap;
+	overflow: hidden;
+	text-overflow: ellipsis;
+	cursor: pointer;
+}

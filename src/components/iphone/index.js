@@ -8,36 +8,40 @@ import Search from '../search';
 import $ from 'jquery';
 
 export default class Iphone extends Component {
-	constructor() {
-		super();
+	constructor(props) {
+		super(props);
+		this.state = {
+			lat: null,
+			lng: null
+		}
+		this.fetchCurrentLocation = this.fetchCurrentLocation.bind(this);
 	}
 
 	componentDidMount() {
-		this.fetchLocation();
+		this.fetchCurrentLocation();
 	}
 
-	fetchLocation() {
+	fetchCurrentLocation() {
 		$.ajax({
 			url: "https://extreme-ip-lookup.com/json",
 			dataType: "jsonp",
 			success: (data) => {
 				this.setState({
-					city: data.city
+					lat: data.lat,
+					lng: data.lon
 				})
 			},
 			error: (res, err) => {
-				alert(err);
+				console.log(res);
 			}
 		});
 	}
-
-
 
 	render() {
 		return (
 			<Router>
 				<Route path="/" component={Home} />
-				<Route path="/search" component={() => <Search location={this.state.city} />} />
+				<Route path="/search" component={() => <Search lat={this.state.lat} lng={this.state.lng} fetchLocation={this.fetchCurrentLocation}/>} />
 			</Router>
 		);
 	}
