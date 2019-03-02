@@ -1,6 +1,6 @@
 // import preact
-import { h, render, Component } from 'preact';
-import { Router, Route, Link } from 'preact-router';
+import { h, Component } from 'preact';
+import { Link } from 'preact-router';
 // import stylesheets for ipad & button
 import style from './style';
 import style_iphone from '../button/style_iphone';
@@ -18,16 +18,20 @@ export default class Home extends Component {
 	// a constructor with initial set states
 	constructor(props){
 		super(props);
-		this.setState({
-			loading: true
-		});
+		this.state = {
+			location: {
+				city: "London",
+				lat: 51,
+				lng: 52
+			}
+		};
 	}
 
-	componentDidMount = () => {
+	componentDidMount() {
 		this.fetchLocation();
 	}
 
-	fetchLocation = () => {
+	fetchLocation() {
 		$.ajax({
 			url: "https://extreme-ip-lookup.com/json",
 			dataType: "jsonp",
@@ -37,9 +41,9 @@ export default class Home extends Component {
 	}
 
 	// a call to fetch weather data via wunderground
-	fetchWeatherData = (data) => {
+	fetchWeatherData(data) {
 		// API URL with a structure of : ttp://api.wunderground.com/api/key/feature/q/country-code/city.json
-		if(data.lat != this.state.lat || data.lon != this.state.lon) {
+		if (data.lat !== this.state.lat || data.lon !== this.state.lon) {
 			this.setState({
 				locate: data.city,
 				lat: data.lat,
@@ -47,9 +51,9 @@ export default class Home extends Component {
 				loading: false
 			});
 		}
-		var url = `https://api.darksky.net/forecast/${config.darksky_secret_key}/${this.state.lat},${this.state.lon}`;
+		const url = `https://api.darksky.net/forecast/${config.darksky_secret_key}/${this.state.lat},${this.state.lon}`;
 		$.ajax({
-			url: url,
+			url,
 			data: {
 				lang: "en",
 				units: 'si'
@@ -57,50 +61,24 @@ export default class Home extends Component {
 			dataType: "jsonp",
 			success : this.parseResponse,
 			error : this.weatherError
-		})
+		});
 			// once the data grabbed, hide the button
 	}
 
-	// the main render method for the iphone component
-	render() {
-		let loading = undefined;
-		if (this.state.loading) {
-			loading = <div class={style.loading}><i class="fas fa-spinner fa-pulse"></i></div>;
-		}
-		// check if temperature data is fetched, if so add the sign styling to the page
-		const tempStyles = this.state.temp ? `${style.temperature} ${style.filled}` : style.temperature;
 
-		// display all weather data
-		return (
-			<div class={ style.container }>
-				{loading}
-				<div class={ style.header }>
-					<Link href="/search">Search</Link>
-					<div class={ style.city }>{ this.state.locate }</div>
-					<div class={ style.conditions }>{ this.state.cond }</div>
-					<span class={ tempStyles }>{ this.state.temp }</span>
-				</div>
-				<div class={ style.details }></div>
-				<div class= { style_iphone.container }>
-					{ this.state.display ? <Button class={ style_iphone.button } clickFunction={ this.fetchLocation }/ > : <Button class={style_iphone.button} clickFunction={this.fetchLocation } text='refresh' /> }
-				</div>
-			</div>
-		);
-	}
-
-	parseLocation = (data) => {
+	parseLocation(data) {
 		console.log(data);
 	}
 
-	locationError = (req, err) => {
+	locationError(req, err) {
 		console.log("Error getting location");
 	}
 
-	weatherError = (req, err) => {
+	weatherError(req, err) {
 		console.log(err);
 	}
 
-	parseResponse = (parsed_json) => {
+	parseResponse(parsed_json) {
 		let temp_c = parsed_json['currently']['temperature'];
 		let conditions = parsed_json['currently']['summary'];
 
@@ -111,4 +89,49 @@ export default class Home extends Component {
 			display: false
 		});
 	}
+
+	// the main render method for the iphone component
+	render() {
+
+		return (
+			<div className={style.container}>
+				<Header title={this.state.location.city} />
+				<main>
+					<Section title="Sun & Moon" figure_class="fas fa-sun" />
+					<Section title="Wind" figure_class="fas fa-wind" />
+					<Section title="Precipitation" figure_class="fas fa-tint" />
+				</main>
+			</div>
+		);
+	}
 }
+
+const Header = (props) => {
+	return (
+		<header>
+			<div className={style.options}>
+				<i className="fa fa-bars" />
+			</div>
+			<div className={style.title}>
+				{props.title}
+			</div>
+			<div className={style.add}>
+				<i className="fa fa-plus" />
+			</div>
+		</header>
+	);
+};
+
+const Section = (props) => {
+	return (
+		<section>
+			<div className={style.section_figure}>
+				<i className={props.figure_class} />
+			</div>
+			<div className={style.section_body}>
+				<h5>{props.title}</h5>
+				{props.children}
+			</div>
+		</section>
+	);
+};
