@@ -3,13 +3,12 @@ import { h, Component } from 'preact';
 import { Link } from 'preact-router';
 // import stylesheets for ipad & button
 import style from './style';
-import style_iphone from '../button/style_iphone';
 // import jquery for API calls
 import $ from 'jquery';
-// import the Button component
-import Button from '../button';
 import * as config from '../../config.json';
 import Search from '../search';
+import List from '../list';
+import Settings from '../settings';
 
 
 export default class Home extends Component {
@@ -19,39 +18,46 @@ export default class Home extends Component {
 	constructor(props){
 		super(props);
 		this.state = {
+			loading: true,
+			openPanel: "home",
+			icon: "",
 			location: {
-				city: "London",
-				lat: 51,
-				lng: 52
+				formatted_address: config.default_search_results[0].formatted_address,
+				geometry: {
+					location: {
+						lat: config.default_search_results[0].geometry.location.lat,
+						lng: config.default_search_results[0].geometry.location.lng
+					}
+				}
+			},
+			weather: {
+				temperature: {
+					current: 0,
+					feelsLike: 0,
+					max: 0,
+					min: 0
+				},
+				wind: {
+					bearing: 0,
+					speed: 0,
+					gust_speed: 0
+				},
+				precipitation: {
+					intensity: 0
+				}
 			}
 		};
+		this.parseResponse = this.parseResponse.bind(this);
+		this.changePanel = this.changePanel.bind(this);
 	}
 
 	componentDidMount() {
-		this.fetchLocation();
+		this.fetchWeatherData();
 	}
 
-	fetchLocation() {
-		$.ajax({
-			url: "https://extreme-ip-lookup.com/json",
-			dataType: "jsonp",
-			success: this.fetchWeatherData,
-			error: this.locationError
-		});
-	}
-
-	// a call to fetch weather data via wunderground
-	fetchWeatherData(data) {
-		// API URL with a structure of : ttp://api.wunderground.com/api/key/feature/q/country-code/city.json
-		if (data.lat !== this.state.lat || data.lon !== this.state.lon) {
-			this.setState({
-				locate: data.city,
-				lat: data.lat,
-				lon: data.lon,
-				loading: false
-			});
-		}
-		const url = `https://api.darksky.net/forecast/${config.darksky_secret_key}/${this.state.lat},${this.state.lon}`;
+	// a call to fetch weather data via dark sky
+	fetchWeatherData() {
+		const url = `https://api.darksky.net/forecast/${config.darksky_secret_key}/${this.state.location.geometry.location.lat},${this.state.location.geometry.location.lng}`;
 		$.ajax({
 			url,
 			data: {
@@ -62,7 +68,6 @@ export default class Home extends Component {
 			success : this.parseResponse,
 			error : this.weatherError
 		});
-			// once the data grabbed, hide the button
 	}
 
 
@@ -71,52 +76,163 @@ export default class Home extends Component {
 	}
 
 	locationError(req, err) {
-		console.log("Error getting location");
+		console.log("Error getting location", err);
 	}
 
 	weatherError(req, err) {
 		console.log(err);
 	}
 
+	highlightsIcon(icon) {
+		switch (icon) {
+			case "clear-day":
+				return "fas fa-sun";
+			case "clear-night":
+				return "fas fa-moon";
+			case "rain":
+				return "fas fa-cloud-rain";
+			case "snow":
+				return "fas fa-snowflake";
+			case "sleet":
+				return "fas fa-cloud-rain";
+			case "wind":
+				return "fas fa-wind";
+			case "fog":
+				return "fas fa-low-vision";
+			case "cloudy":
+				return "fas fa-cloud";
+			case "partly-cloudy-day":
+				return "fas fa-cloud-sun";
+			case "partly-cloudy-night":
+				return "fas fa-cloud-moon";
+			default:
+				return "fas fa-question";
+		}
+	}
+
 	parseResponse(parsed_json) {
-		let temp_c = parsed_json['currently']['temperature'];
-		let conditions = parsed_json['currently']['summary'];
+		console.log(parsed_json);
+
+		let highlightsIcon = this.highlightsIcon(parsed_json['currently']['icon']);
+
+		let current_temp = Math.round(parsed_json['currently']['temperature']);
+		let feelslike_temp = Math.round(parsed_json['currently']['apparentTemperature']);
+		let max_temp = Math.round(parsed_json['daily'].data[0]['apparentTemperatureMax']);
+		let min_temp = Math.round(parsed_json['daily'].data[0]['apparentTemperatureMin']);
+
+		let wind_bearing = parsed_json['currently']['windBearing'];
+		let wind_speed = parsed_json['currently']['windSpeed'];
+		let wind_gust_speed = parsed_json['currently']['windGust'];
+
+		let precip_intensity = parsed_json['currently']['precipIntensity'];
 
 		// set states for fields so they could be rendered later on
 		this.setState({
-			temp: temp_c,
-			cond : conditions,
-			display: false
+			loading: false,
+			icon: highlightsIcon,
+			weather: {
+				temperature: {
+					current: current_temp,
+					feelsLike: feelslike_temp,
+					max: max_temp,
+					min: min_temp
+				},
+				wind: {
+					bearing: wind_bearing,
+					speed: wind_speed,
+					gust_speed: wind_gust_speed
+				},
+				precipitation: {
+					intensity: precip_intensity
+				}
+			}
+		});
+	}
+
+	changePanel(e) {
+		this.setState({
+			openPanel: e.target.dataset['panelName']
 		});
 	}
 
 	// the main render method for the iphone component
 	render() {
+		let arrowTransform = `shrink-6 rotate-${this.state.weather.wind.bearing}`;
+		let loadingClasses = this.state.loading ? style.loading : [style.loading, style.hide].join(' ');
 
-		return (
+		const homeDisplay = (
 			<div className={style.container}>
-				<Header title={this.state.location.city} />
+				<div className={loadingClasses}>
+					<i class="fas fa-spinner fa-pulse fa-2x" style="align-self: center;"/>
+				</div>
+				<Header title={this.state.location.formatted_address} changePanel={this.changePanel}/>
 				<main>
-					<Section title="Sun & Moon" figure_class="fas fa-sun" />
-					<Section title="Wind" figure_class="fas fa-wind" />
-					<Section title="Precipitation" figure_class="fas fa-tint" />
+					<aside>
+						<i class={this.state.icon} />
+					</aside>
+					<Section title="Temperature" figure_class="fas fa-thermometer-three-quarters">
+						<div className={style.focus}>
+							{this.state.weather.temperature.current}
+						</div>
+						<div className={style.details}>
+							<div>Feels Like: {this.state.weather.temperature.feelsLike}</div>
+							<div>Max: {this.state.weather.temperature.max}</div>
+							<div>Min: {this.state.weather.temperature.min}</div>
+						</div>
+					</Section>
+					<Section title="Wind" figure_class="fas fa-wind">
+						<div className={style.focus}>
+							<span class="fa-layers fa-fw" style="margin-left:-5px;">
+								<i class="fas fa-circle" style="color:#5F6C74" />
+								<i class="fa-inverse fas fa-arrow-up" data-fa-transform={arrowTransform} />
+							</span>
+						</div>
+						<div className={style.details}>
+							<div>Wind Speed: {this.state.weather.wind.speed}</div>
+							<div>Gust Speed: {this.state.weather.temperature.max}</div>
+							<div>Bearing: {this.state.weather.wind.bearing}° N</div>
+						</div>
+					</Section>
+					<Section title="Precipitation" figure_class="fas fa-tint">
+						<div className={style.focus}>
+							{this.state.weather.precipitation.intensity}
+						</div>
+						<div className={style.details}>
+							<div>Wind Speed: {this.state.weather.precipitation.intensity}</div>
+							<div>Gust Speed: {this.state.weather.temperature.max}</div>
+							<div>Bearing: {this.state.weather.wind.bearing}</div>
+						</div>
+					</Section>
 				</main>
 			</div>
 		);
+
+		switch (this.state.openPanel) {
+			case "home":
+				return homeDisplay;
+			case "search":
+				return <Search />;
+			case "list":
+				return <List />;
+			case "settings":
+				return <Settings />;
+			default:
+				return homeDisplay;
+		}
 	}
 }
 
 const Header = (props) => {
 	return (
 		<header>
-			<div className={style.options}>
-				<i className="fa fa-bars" />
+			<div className={style.options} onClick={props.changePanel} data-panel-name="list">
+				<i className="fa fa-bars" data-panel-name="list" />
 			</div>
 			<div className={style.title}>
 				{props.title}
 			</div>
-			<div className={style.add}>
-				<i className="fa fa-plus" />
+			<div className={style.add} onClick={props.changePanel} data-panel-name="search">
+				<i className="fa fa-search" data-panel-name="search" />
 			</div>
 		</header>
 	);
@@ -128,9 +244,11 @@ const Section = (props) => {
 			<div className={style.section_figure}>
 				<i className={props.figure_class} />
 			</div>
-			<div className={style.section_body}>
-				<h5>{props.title}</h5>
-				{props.children}
+			<div className={style.section_content}>
+				<h5 className={style.section_title}>{props.title}</h5>
+				<div className={style.section_body}>
+					{props.children}
+				</div>
 			</div>
 		</section>
 	);
