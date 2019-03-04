@@ -10,6 +10,9 @@ import Search from '../search';
 import List from '../list';
 import Settings from '../settings';
 
+String.prototype.capitalise = function() {
+	return this.charAt(0).toUpperCase() + this.slice(1);
+};
 
 export default class Home extends Component {
 //var Iphone = React.createClass({
@@ -20,8 +23,8 @@ export default class Home extends Component {
 		this.state = {
 			loading: true,
 			openPanel: "home",
-			icon: "",
 			location: {
+				icon: "fas fa-question",
 				formatted_address: config.default_search_results[0].formatted_address,
 				geometry: {
 					location: {
@@ -31,6 +34,12 @@ export default class Home extends Component {
 				}
 			},
 			weather: {
+				icon: "",
+				summary: "",
+				sun: {
+					rise: "00:00:00",
+					set: "00:00:00"
+				},
 				temperature: {
 					current: 0,
 					feelsLike: 0,
@@ -114,6 +123,10 @@ export default class Home extends Component {
 		console.log(parsed_json);
 
 		let highlightsIcon = this.highlightsIcon(parsed_json['currently']['icon']);
+		let weather_summary = parsed_json['currently']['summary'];
+
+		let sun_rise = new Date(parsed_json['daily'].data[0].sunriseTime * 1000).toLocaleTimeString().slice(0,5);
+		let sun_set = new Date(parsed_json['daily'].data[0].sunsetTime * 1000).toLocaleTimeString().slice(0,5);
 
 		let current_temp = Math.round(parsed_json['currently']['temperature']);
 		let feelslike_temp = Math.round(parsed_json['currently']['apparentTemperature']);
@@ -124,13 +137,20 @@ export default class Home extends Component {
 		let wind_speed = parsed_json['currently']['windSpeed'];
 		let wind_gust_speed = parsed_json['currently']['windGust'];
 
-		let precip_intensity = parsed_json['currently']['precipIntensity'];
+		let precip_type = parsed_json['currently']['precipType'] ? parsed_json['currently']['precipType'].capitalise() : "Precipitation";
+		let precip_icon = (parsed_json['currently']['precipType'] === "snow") ? "fas fa-snowflake" : "fas fa-tint";
+		let precip_probability = Math.round(parsed_json['currently']['precipProbability'] * 100);
 
 		// set states for fields so they could be rendered later on
 		this.setState({
 			loading: false,
-			icon: highlightsIcon,
 			weather: {
+				icon: highlightsIcon,
+				summary: weather_summary,
+				sun: {
+					rise: sun_rise,
+					set: sun_set
+				},
 				temperature: {
 					current: current_temp,
 					feelsLike: feelslike_temp,
@@ -143,7 +163,9 @@ export default class Home extends Component {
 					gust_speed: wind_gust_speed
 				},
 				precipitation: {
-					intensity: precip_intensity
+					type: precip_type,
+					icon: precip_icon,
+					probability: precip_probability
 				}
 			}
 		});
@@ -167,22 +189,41 @@ export default class Home extends Component {
 				</div>
 				<Header title={this.state.location.formatted_address} changePanel={this.changePanel}/>
 				<main>
-					<aside>
-						<i class={this.state.icon} />
+					<aside class={style.glance}>
+						<div class={style.glance_icon}>
+							<i class={this.state.weather.icon} />
+						</div>
+						<div class={style.glance_sun}>
+							<p>
+								<span class="fa-layers fa-fw" style="font-size:30pt; vertical-align: middle;">
+									<i class="fas fa-sun" data-fa-transform="shrink-6" />
+									<i class="fas fa-arrow-up" data-fa-transform="shrink-12 up-8" />
+								</span>
+								{this.state.weather.sun.rise}
+							</p>
+							<p>
+								<span class="fa-layers fa-fw" style="font-size:30pt; vertical-align: middle;">
+									<i class="fas fa-sun" data-fa-transform="shrink-6" />
+									<i class="fas fa-arrow-down" data-fa-transform="shrink-12 up-8" />
+								</span>
+								{this.state.weather.sun.set}
+							</p>
+						</div>
+						<div>{this.state.weather.summary}</div>
 					</aside>
 					<Section title="Temperature" figure_class="fas fa-thermometer-three-quarters">
 						<div className={style.focus}>
-							{this.state.weather.temperature.current}
+							{this.state.weather.temperature.current}°
 						</div>
 						<div className={style.details}>
-							<div>Feels Like: {this.state.weather.temperature.feelsLike}</div>
-							<div>Max: {this.state.weather.temperature.max}</div>
-							<div>Min: {this.state.weather.temperature.min}</div>
+							<div>Feels Like: {this.state.weather.temperature.feelsLike}°</div>
+							<div>Max: {this.state.weather.temperature.max}°</div>
+							<div>Min: {this.state.weather.temperature.min}°</div>
 						</div>
 					</Section>
 					<Section title="Wind" figure_class="fas fa-wind">
-						<div className={style.focus}>
-							<span class="fa-layers fa-fw" style="margin-left:-5px;">
+						<div className={style.focus} style="margin-left:-5px;margin-right:5px;">
+							<span class="fa-layers fa-fw">
 								<i class="fas fa-circle" style="color:#5F6C74" />
 								<i class="fa-inverse fas fa-arrow-up" data-fa-transform={arrowTransform} />
 							</span>
@@ -193,9 +234,9 @@ export default class Home extends Component {
 							<div>Bearing: {this.state.weather.wind.bearing}° N</div>
 						</div>
 					</Section>
-					<Section title="Precipitation" figure_class="fas fa-tint">
+					<Section title={this.state.weather.precipitation.type} figure_class="fas fa-tint">
 						<div className={style.focus}>
-							{this.state.weather.precipitation.intensity}
+							{this.state.weather.precipitation.probability}<span style="font-size:smaller;">%</span>
 						</div>
 						<div className={style.details}>
 							<div>Wind Speed: {this.state.weather.precipitation.intensity}</div>
@@ -206,19 +247,7 @@ export default class Home extends Component {
 				</main>
 			</div>
 		);
-
-		switch (this.state.openPanel) {
-			case "home":
-				return homeDisplay;
-			case "search":
-				return <Search />;
-			case "list":
-				return <List />;
-			case "settings":
-				return <Settings />;
-			default:
-				return homeDisplay;
-		}
+		return homeDisplay;
 	}
 }
 

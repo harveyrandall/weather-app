@@ -26,8 +26,6 @@ body {
 
 
 .container {
-	display: flex;
-	flex-direction: column;
 	background-image: url('../../assets/backgrounds/clear-iphone.jpg');
 	color: #fff;
 	width: 414px;
@@ -36,6 +34,34 @@ body {
 	padding:5px 15px;
 	margin: 0 auto;
 }
+
+main {
+	display:flex;
+	flex-direction: column;
+	color:white;
+}
+
+
+/* ASIDE - HIGHLIGHTS */
+aside.glance {
+	width: 75%;
+	align-self: center;
+	display:flex;
+	flex-direction: row;
+	justify-content: space-around;
+	flex-wrap: wrap;
+}
+aside.glance .glance_icon {
+	align-self: center;
+}
+aside.glance .glance_icon svg, aside.glance .glance_icon i {
+	font-size:90pt;
+}
+aside.glance .glance_sun {
+	align-self: center;
+	margin-top: 10px;
+}
+
 
 header {
 	display:flex;
@@ -56,11 +82,6 @@ header .add {
 	width:10%;
 	text-align: right;
 	cursor: pointer;
-}
-
-/* ASIDE - HIGHLIGHTS */
-aside {
-	display:flex;
 }
 
 /* SECTIONS */
@@ -102,18 +123,18 @@ section .section_body {
 
 /* SUN AND MOON */
 section .section_body .focus {
-	width:25%;
-	align-self: flex-start;
+	width:35%;
+	align-self: center;
 	justify-content: center;
 	text-align: center;
-	font-size:40pt;
-	line-height: 40pt;
+	font-size:35pt;
+	line-height: 35pt;
 	font-weight: bold;
 	padding-right:10px;
 }
 
 section .section_body .details {
-	width:75%;
+	width:65%;
 	display:flex;
 	flex-direction: column;
 	justify-content: flex-start;
