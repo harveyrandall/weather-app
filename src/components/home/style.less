@@ -19,6 +19,7 @@ body {
 	align-content: center;
 	text-align: center;
 }
+
 .hide {
 	top: -1000px;
 	transition: all 1s ease-in-out;
@@ -33,6 +34,35 @@ body {
 	text-align: center;
 	padding:5px 15px;
 	margin: 0 auto;
+	transition: all .5s ease-in-out;
+}
+
+.options_pane {
+	display:flex;
+	flex-direction: column;
+	position: absolute;
+	overflow:hidden;
+	margin:-5px -15px;
+	padding:5px 15px;
+	width:310px;
+	height:736px;
+	background:#525252;
+	z-index:1;
+	font-size:1.5em;
+	transition: all .5s ease-in-out;
+}
+.hide_options {
+	width:0px;
+	padding:0px;
+	transition: all .5s ease-in-out;
+}
+.options_header {
+	padding-bottom: 10px;
+	border-bottom: 1px solid white;
+}
+.options_header i, .options_header svg {
+	float:right;
+	height:100%;
 }
 
 main {
@@ -63,22 +93,22 @@ aside.glance .glance_sun {
 }
 
 
-header {
+.home_header {
 	display:flex;
 	justify-content: space-between;
 	font-size: 1.7em;
 	margin-bottom:20px;
 }
-header .options {
+.home_header .options {
 	width:10%;
 	text-align: left;
 	cursor: pointer;
 }
-header .title {
+.home_header .title {
 	font-weight: bold;
 	width:80%;
 }
-header .add {
+.home_header .add {
 	width:10%;
 	text-align: right;
 	cursor: pointer;

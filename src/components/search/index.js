@@ -1,7 +1,3 @@
-<<<<<<< HEAD
-'use strict';
-=======
->>>>>>> bbc339c67a24ad408a6ef273ccba5a05d118d60e
 // import preact
 import { h, Component } from 'preact';
 import { Link } from 'preact-router';
