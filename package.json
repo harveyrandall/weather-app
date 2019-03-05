@@ -38,7 +38,11 @@
     "css-loader": "^0.26.1",
     "eslint": "^3.0.1",
     "eslint-config-standard-preact": "^1.1.6",
+<<<<<<< HEAD
     "eslint-plugin-react": "^7.12.4",
+=======
+    "eslint-plugin-jest": "^22.3.0",
+>>>>>>> bbc339c67a24ad408a6ef273ccba5a05d118d60e
     "extract-text-webpack-plugin": "^1.0.1",
     "file-loader": "^0.9.0",
     "html-webpack-plugin": "^2.22.0",

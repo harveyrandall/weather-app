@@ -1,19 +1,19 @@
 // import preact
-import { h, render, Component } from 'preact';
+import { h, Component } from 'preact';
 import { Router, Route, Link } from 'preact-router';
 
 import Home from "../home";
 import Search from '../search';
 
 import $ from 'jquery';
+import * as config from '../../config.json';
 
 export default class Iphone extends Component {
 	constructor(props) {
 		super(props);
 		this.state = {
-			lat: null,
-			lng: null
-		}
+			location: config.default_search_results[0]
+		};
 		this.fetchCurrentLocation = this.fetchCurrentLocation.bind(this);
 	}
 
@@ -29,10 +29,10 @@ export default class Iphone extends Component {
 				this.setState({
 					lat: data.lat,
 					lng: data.lon
-				})
+				});
 			},
 			error: (res, err) => {
-				console.log(res);
+				console.log(res, err);
 			}
 		});
 	}
