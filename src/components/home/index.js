@@ -7,7 +7,6 @@ import style from './style';
 import $ from 'jquery';
 import * as config from '../../config.json';
 import Search from '../search';
-//import List from '../list';
 import Settings from '../settings';
 import Outfits from '../outfits';
 
@@ -22,7 +21,8 @@ export default class Home extends Component {
 	constructor(props){
 		super(props);
 		this.state = {
-			loading: true,
+			loading: false,
+			optionsPaneOpen: true,
 			openPanel: "home",
 			location: {
 				icon: "fas fa-question",
@@ -59,10 +59,11 @@ export default class Home extends Component {
 		};
 		this.parseResponse = this.parseResponse.bind(this);
 		this.changePanel = this.changePanel.bind(this);
+		this.toggleOptionsPane = this.toggleOptionsPane.bind(this);
 	}
 
 	componentDidMount() {
-		this.fetchWeatherData();
+		//this.fetchWeatherData();
 	}
 
 	// a call to fetch weather data via dark sky
@@ -178,6 +179,12 @@ export default class Home extends Component {
 		});
 	}
 
+	toggleOptionsPane() {
+		this.setState({
+			optionsPaneOpen: !this.state.optionsPaneOpen
+		});
+	}
+
 	// the main render method for the iphone component
 	render() {
 		let arrowTransform = `shrink-6 rotate-${this.state.weather.wind.bearing}`;
@@ -185,11 +192,11 @@ export default class Home extends Component {
 
 		const homeDisplay = (
 			<div className={style.container}>
-				<List />
+				<Options isOpen={this.state.optionsPaneOpen} toggleOptionsPane={this.toggleOptionsPane} />
 				<div className={loadingClasses}>
 					<i class="fas fa-spinner fa-pulse fa-2x" style="align-self: center;"/>
 				</div>
-				<Header title={this.state.location.formatted_address} changePanel={this.changePanel}/>
+				<Header title={this.state.location.formatted_address} changePanel={this.changePanel} toggleOptionsPane={this.toggleOptionsPane} />
 				<main>
 					<aside class={style.glance}>
 						<div class={style.glance_icon}>
@@ -256,8 +263,8 @@ export default class Home extends Component {
 
 const Header = (props) => {
 	return (
-		<header>
-			<div className={style.options} onClick={props.changePanel} data-panel-name="list">
+		<header class={style.home_header}>
+			<div className={style.options} onClick={props.toggleOptionsPane} data-panel-name="list">
 				<i className="fa fa-bars" data-panel-name="list" />
 			</div>
 			<div className={style.title}>
@@ -286,10 +293,17 @@ const Section = (props) => {
 	);
 };
 
-const List = () => {
+const Options = (props) => {
+	let classes = props.isOpen ? style.options_pane : [style.options_pane, style.hide_options].join(' ');
+
 	return (
-		<div class={style.options, style.hidden}>
-			hello world
+		<div class={classes}>
+			<header class={style.options_header}>
+				Options
+				<span onClick={props.toggleOptionsPane} style="cursor:pointer;">
+					<i class="fas fa-arrow-right" onClick={props.toggleOptionsPane} />
+				</span>
+			</header>
 		</div>
 	);
 };
