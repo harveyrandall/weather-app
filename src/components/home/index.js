@@ -7,8 +7,9 @@ import style from './style';
 import $ from 'jquery';
 import * as config from '../../config.json';
 import Search from '../search';
-import List from '../list';
+//import List from '../list';
 import Settings from '../settings';
+import Outfits from '../outfits';
 
 String.prototype.capitalise = function() {
 	return this.charAt(0).toUpperCase() + this.slice(1);
@@ -184,6 +185,7 @@ export default class Home extends Component {
 
 		const homeDisplay = (
 			<div className={style.container}>
+				<List />
 				<div className={loadingClasses}>
 					<i class="fas fa-spinner fa-pulse fa-2x" style="align-self: center;"/>
 				</div>
@@ -247,6 +249,7 @@ export default class Home extends Component {
 				</main>
 			</div>
 		);
+
 		return homeDisplay;
 	}
 }
@@ -280,5 +283,13 @@ const Section = (props) => {
 				</div>
 			</div>
 		</section>
+	);
+};
+
+const List = () => {
+	return (
+		<div class={style.options, style.hidden}>
+			hello world
+		</div>
 	);
 };
