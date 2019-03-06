@@ -44,7 +44,9 @@ export default class Iphone extends Component {
 				},
 				precipitation: {
 					intensity: 0
-				}
+				},
+				week_forecast: [],
+				hourly_forecast: []
 			}
 		};
 		this.parseResponse = this.parseResponse.bind(this);
@@ -74,7 +76,7 @@ export default class Iphone extends Component {
 		});
 	}
 
-	highlightsIcon(icon) {
+	iconToFAClasses(icon) {
 		switch (icon) {
 			case "clear-day":
 				return "fas fa-sun";
@@ -104,8 +106,8 @@ export default class Iphone extends Component {
 	parseResponse(parsed_json) {
 		console.log(parsed_json);
 
-		let highlightsIcon = this.highlightsIcon(parsed_json['currently']['icon']);
-		let weather_summary = parsed_json['currently']['summary'];
+		let highlightsIcon = this.iconToFAClasses(parsed_json['daily'].data[0]['icon']);
+		let weather_summary = parsed_json['daily'].data[0]['summary'];
 
 		let sun_rise = new Date(parsed_json['daily'].data[0].sunriseTime * 1000).toLocaleTimeString().slice(0,5);
 		let sun_set = new Date(parsed_json['daily'].data[0].sunsetTime * 1000).toLocaleTimeString().slice(0,5);
@@ -122,6 +124,9 @@ export default class Iphone extends Component {
 		let precip_type = parsed_json['currently']['precipType'] ? parsed_json['currently']['precipType'].capitalise() : "Precipitation";
 		let precip_icon = (parsed_json['currently']['precipType'] === "snow") ? "fas fa-snowflake" : "fas fa-tint";
 		let precip_probability = Math.round(parsed_json['currently']['precipProbability'] * 100);
+
+		let week_forecast = parsed_json['daily'].data.slice(1);
+		let hourly_forecast = parsed_json['hourly'].data.slice(0,24);
 
 		// set states for fields so they could be rendered later on
 		this.setState({
@@ -148,7 +153,9 @@ export default class Iphone extends Component {
 					type: precip_type,
 					icon: precip_icon,
 					probability: precip_probability
-				}
+				},
+				week_forecast,
+				hourly_forecast
 			}
 		});
 	}
@@ -166,6 +173,7 @@ export default class Iphone extends Component {
 							loading={this.state.loading}
 							parseResponse={this.parseResponse}
 							changePanel={this.changePanel}
+							convertIcon={this.iconToFAClasses}
 						/>;
 			case "outfits":
 				return <Outfits />;

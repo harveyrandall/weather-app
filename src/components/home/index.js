@@ -115,6 +115,8 @@ export default class Home extends Component {
 							<div>Bearing: {this.props.weather.wind.bearing}</div>
 						</div>
 					</Section>
+					<WeekForecast forecast={this.props.weather.week_forecast} convertIcon={this.props.convertIcon} />
+					<HourlyForecast forecast={this.props.weather.hourly_forecast} convertIcon={this.props.convertIcon} />
 				</main>
 			</div>
 		);
@@ -148,6 +150,50 @@ const Section = (props) => {
 				<div className={style.section_body}>
 					{props.children}
 				</div>
+			</div>
+		</section>
+	);
+};
+
+const WeekForecast = (props) => {
+	props.forecast.map((val) => {
+		val.icon = props.convertIcon(val.icon);
+	});
+	return (
+		<section className={style.week_forecast}>
+			<div class={style.days}>
+				{props.forecast.map((val) => {
+					return (<div className={style.forecast_day}>
+						<h6>{new Date(val.time * 1000).toGMTString().slice(0,3)}</h6>
+						<i class={val.icon} />
+						{val.apparentTemperatureMax}°
+					</div>);
+				})}
+			</div>
+			<div class={style.more}>
+				<i class="fas fa-arrow-right" />
+			</div>
+		</section>
+	);
+};
+
+const HourlyForecast = (props) => {
+	props.forecast.map((val) => {
+		val.icon = props.convertIcon(val.icon);
+	});
+	return (
+		<section className={style.week_forecast}>
+			<div class={style.days}>
+				{props.forecast.map((val) => {
+					return (<div className={style.forecast_day}>
+						<h6>{new Date(val.time * 1000).toGMTString().slice(17,22)}</h6>
+						<i class={val.icon} />
+						{val.temperature}°
+					</div>);
+				})}
+			</div>
+			<div class={style.more}>
+				<i class="fas fa-arrow-right" />
 			</div>
 		</section>
 	);
