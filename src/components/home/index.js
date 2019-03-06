@@ -1,14 +1,10 @@
 // import preact
 import { h, Component } from 'preact';
-import { Link } from 'preact-router';
 // import stylesheets for ipad & button
 import style from './style';
 // import jquery for API calls
 import $ from 'jquery';
 import * as config from '../../config.json';
-import Search from '../search';
-import Settings from '../settings';
-import Outfits from '../outfits';
 
 String.prototype.capitalise = function() {
 	return this.charAt(0).toUpperCase() + this.slice(1);
@@ -21,54 +17,18 @@ export default class Home extends Component {
 	constructor(props){
 		super(props);
 		this.state = {
-			loading: false,
-			optionsPaneOpen: true,
-			openPanel: "home",
-			location: {
-				icon: "fas fa-question",
-				formatted_address: config.default_search_results[0].formatted_address,
-				geometry: {
-					location: {
-						lat: config.default_search_results[0].geometry.location.lat,
-						lng: config.default_search_results[0].geometry.location.lng
-					}
-				}
-			},
-			weather: {
-				icon: "",
-				summary: "",
-				sun: {
-					rise: "00:00:00",
-					set: "00:00:00"
-				},
-				temperature: {
-					current: 0,
-					feelsLike: 0,
-					max: 0,
-					min: 0
-				},
-				wind: {
-					bearing: 0,
-					speed: 0,
-					gust_speed: 0
-				},
-				precipitation: {
-					intensity: 0
-				}
-			}
+			savedPaneOpen: false
 		};
-		this.parseResponse = this.parseResponse.bind(this);
-		this.changePanel = this.changePanel.bind(this);
-		this.toggleOptionsPane = this.toggleOptionsPane.bind(this);
+		this.toggleSavedPane = this.toggleSavedPane.bind(this);
 	}
 
 	componentDidMount() {
-		//this.fetchWeatherData();
+		this.fetchWeatherData();
 	}
 
 	// a call to fetch weather data via dark sky
 	fetchWeatherData() {
-		const url = `https://api.darksky.net/forecast/${config.darksky_secret_key}/${this.state.location.geometry.location.lat},${this.state.location.geometry.location.lng}`;
+		const url = `https://api.darksky.net/forecast/${config.darksky_secret_key}/${this.props.location.geometry.location.lat},${this.props.location.geometry.location.lng}`;
 		$.ajax({
 			url,
 			data: {
@@ -76,131 +36,33 @@ export default class Home extends Component {
 				units: 'si'
 			},
 			dataType: "jsonp",
-			success : this.parseResponse,
+			success : this.props.parseResponse,
 			error : this.weatherError
 		});
 	}
 
-
-	parseLocation(data) {
-		console.log(data);
-	}
-
-	locationError(req, err) {
-		console.log("Error getting location", err);
-	}
-
-	weatherError(req, err) {
-		console.log(err);
-	}
-
-	highlightsIcon(icon) {
-		switch (icon) {
-			case "clear-day":
-				return "fas fa-sun";
-			case "clear-night":
-				return "fas fa-moon";
-			case "rain":
-				return "fas fa-cloud-rain";
-			case "snow":
-				return "fas fa-snowflake";
-			case "sleet":
-				return "fas fa-cloud-rain";
-			case "wind":
-				return "fas fa-wind";
-			case "fog":
-				return "fas fa-low-vision";
-			case "cloudy":
-				return "fas fa-cloud";
-			case "partly-cloudy-day":
-				return "fas fa-cloud-sun";
-			case "partly-cloudy-night":
-				return "fas fa-cloud-moon";
-			default:
-				return "fas fa-question";
-		}
-	}
-
-	parseResponse(parsed_json) {
-		console.log(parsed_json);
-
-		let highlightsIcon = this.highlightsIcon(parsed_json['currently']['icon']);
-		let weather_summary = parsed_json['currently']['summary'];
-
-		let sun_rise = new Date(parsed_json['daily'].data[0].sunriseTime * 1000).toLocaleTimeString().slice(0,5);
-		let sun_set = new Date(parsed_json['daily'].data[0].sunsetTime * 1000).toLocaleTimeString().slice(0,5);
-
-		let current_temp = Math.round(parsed_json['currently']['temperature']);
-		let feelslike_temp = Math.round(parsed_json['currently']['apparentTemperature']);
-		let max_temp = Math.round(parsed_json['daily'].data[0]['apparentTemperatureMax']);
-		let min_temp = Math.round(parsed_json['daily'].data[0]['apparentTemperatureMin']);
-
-		let wind_bearing = parsed_json['currently']['windBearing'];
-		let wind_speed = parsed_json['currently']['windSpeed'];
-		let wind_gust_speed = parsed_json['currently']['windGust'];
-
-		let precip_type = parsed_json['currently']['precipType'] ? parsed_json['currently']['precipType'].capitalise() : "Precipitation";
-		let precip_icon = (parsed_json['currently']['precipType'] === "snow") ? "fas fa-snowflake" : "fas fa-tint";
-		let precip_probability = Math.round(parsed_json['currently']['precipProbability'] * 100);
-
-		// set states for fields so they could be rendered later on
+	toggleSavedPane() {
 		this.setState({
-			loading: false,
-			weather: {
-				icon: highlightsIcon,
-				summary: weather_summary,
-				sun: {
-					rise: sun_rise,
-					set: sun_set
-				},
-				temperature: {
-					current: current_temp,
-					feelsLike: feelslike_temp,
-					max: max_temp,
-					min: min_temp
-				},
-				wind: {
-					bearing: wind_bearing,
-					speed: wind_speed,
-					gust_speed: wind_gust_speed
-				},
-				precipitation: {
-					type: precip_type,
-					icon: precip_icon,
-					probability: precip_probability
-				}
-			}
-		});
-	}
-
-	changePanel(e) {
-		this.setState({
-			openPanel: e.target.dataset['panelName']
-		});
-	}
-
-	toggleOptionsPane() {
-		this.setState({
-			optionsPaneOpen: !this.state.optionsPaneOpen
+			savedPaneOpen: !this.state.savedPaneOpen
 		});
 	}
 
 	// the main render method for the iphone component
 	render() {
-		let arrowTransform = `shrink-6 rotate-${this.state.weather.wind.bearing}`;
-		let loadingClasses = this.state.loading ? style.loading : [style.loading, style.hide].join(' ');
+		let arrowTransform = `shrink-6 rotate-${this.props.weather.wind.bearing}`;
+		let loadingClasses = this.props.loading ? style.loading : [style.loading, style.hide].join(' ');
 
-		const homeDisplay = (
+		return (
 			<div className={style.container}>
-				<Options isOpen={this.state.optionsPaneOpen} toggleOptionsPane={this.toggleOptionsPane} />
+				<Saved isOpen={this.state.savedPaneOpen} toggleSavedPane={this.toggleSavedPane} />
 				<div className={loadingClasses}>
 					<i class="fas fa-spinner fa-pulse fa-2x" style="align-self: center;"/>
 				</div>
-				<Header title={this.state.location.formatted_address} changePanel={this.changePanel} toggleOptionsPane={this.toggleOptionsPane} />
+				<Header title={this.props.location.formatted_address} changePanel={this.props.changePanel} toggleOptionsPane={this.toggleSavedPane} />
 				<main>
 					<aside class={style.glance}>
 						<div class={style.glance_icon}>
-							<i class={this.state.weather.icon} />
+							<i class={this.props.weather.icon} />
 						</div>
 						<div class={style.glance_sun}>
 							<p>
@@ -208,26 +70,26 @@ export default class Home extends Component {
 									<i class="fas fa-sun" data-fa-transform="shrink-6" />
 									<i class="fas fa-arrow-up" data-fa-transform="shrink-12 up-8" />
 								</span>
-								{this.state.weather.sun.rise}
+								{this.props.weather.sun.rise}
 							</p>
 							<p>
 								<span class="fa-layers fa-fw" style="font-size:30pt; vertical-align: middle;">
 									<i class="fas fa-sun" data-fa-transform="shrink-6" />
 									<i class="fas fa-arrow-down" data-fa-transform="shrink-12 up-8" />
 								</span>
-								{this.state.weather.sun.set}
+								{this.props.weather.sun.set}
 							</p>
 						</div>
-						<div>{this.state.weather.summary}</div>
+						<div class={style.glance_summary}>{this.props.weather.summary}</div>
 					</aside>
 					<Section title="Temperature" figure_class="fas fa-thermometer-three-quarters">
 						<div className={style.focus}>
-							{this.state.weather.temperature.current}°
+							{this.props.weather.temperature.current}°
 						</div>
 						<div className={style.details}>
-							<div>Feels Like: {this.state.weather.temperature.feelsLike}°</div>
-							<div>Max: {this.state.weather.temperature.max}°</div>
-							<div>Min: {this.state.weather.temperature.min}°</div>
+							<div>Feels Like: {this.props.weather.temperature.feelsLike}°</div>
+							<div>Max: {this.props.weather.temperature.max}°</div>
+							<div>Min: {this.props.weather.temperature.min}°</div>
 						</div>
 					</Section>
 					<Section title="Wind" figure_class="fas fa-wind">
@@ -238,26 +100,24 @@ export default class Home extends Component {
 							</span>
 						</div>
 						<div className={style.details}>
-							<div>Wind Speed: {this.state.weather.wind.speed}</div>
-							<div>Gust Speed: {this.state.weather.temperature.max}</div>
-							<div>Bearing: {this.state.weather.wind.bearing}° N</div>
+							<div>Wind Speed: {this.props.weather.wind.speed}</div>
+							<div>Gust Speed: {this.props.weather.temperature.max}</div>
+							<div>Bearing: {this.props.weather.wind.bearing}° N</div>
 						</div>
 					</Section>
-					<Section title={this.state.weather.precipitation.type} figure_class="fas fa-tint">
+					<Section title={this.props.weather.precipitation.type} figure_class="fas fa-tint">
 						<div className={style.focus}>
-							{this.state.weather.precipitation.probability}<span style="font-size:smaller;">%</span>
+							{this.props.weather.precipitation.probability}<span style="font-size:smaller;">%</span>
 						</div>
 						<div className={style.details}>
-							<div>Wind Speed: {this.state.weather.precipitation.intensity}</div>
-							<div>Gust Speed: {this.state.weather.temperature.max}</div>
-							<div>Bearing: {this.state.weather.wind.bearing}</div>
+							<div>Wind Speed: {this.props.weather.precipitation.intensity}</div>
+							<div>Gust Speed: {this.props.weather.temperature.max}</div>
+							<div>Bearing: {this.props.weather.wind.bearing}</div>
 						</div>
 					</Section>
 				</main>
 			</div>
 		);
-
-		return homeDisplay;
 	}
 }
 
@@ -293,17 +153,35 @@ const Section = (props) => {
 	);
 };
 
-const Options = (props) => {
-	let classes = props.isOpen ? style.options_pane : [style.options_pane, style.hide_options].join(' ');
+const Saved = (props) => {
+	let classes = props.isOpen ? style.saved_pane : [style.saved_pane, style.hide_saved].join(' ');
 
 	return (
-		<div class={classes}>
-			<header class={style.options_header}>
-				Options
-				<span onClick={props.toggleOptionsPane} style="cursor:pointer;">
-					<i class="fas fa-arrow-right" onClick={props.toggleOptionsPane} />
+		<aside class={classes}>
+			<header class={style.saved_header}>
+				Saved Locations
+				<span onClick={props.toggleSavedPane} style="cursor:pointer;">
+					<i class="fas fa-times" />
 				</span>
 			</header>
-		</div>
+			<div class={style.panel_buttons}>
+				<div class={style.saved_locations}>
+					{config.default_search_results.slice(0,3).map((val) => {
+						return (
+							<div class={style.option} data-location={val.formatted_address} data-lat={val.geometry.location.lat} data-lng={val.geometry.location.lng}>
+								{val.formatted_address}
+							</div>
+						);
+					})}
+					<div class={style.option}>
+						<i class="fas fa-plus" />
+					</div>
+				</div>
+				<div class={style.bottom_buttons}>
+					<div class={style.bottom_option}><i class="fas fa-cog" /></div>
+					<div class={style.bottom_option}>Help</div>
+				</div>
+			</div>
+		</aside>
 	);
 };
