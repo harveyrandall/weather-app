@@ -16,10 +16,8 @@ export default class Home extends Component {
 	// a constructor with initial set states
 	constructor(props){
 		super(props);
-		this.state = {
-			savedPaneOpen: false
-		};
-		this.toggleSavedPane = this.toggleSavedPane.bind(this);
+		this.selectSavedLocation = this.selectSavedLocation.bind(this);
+		this.fetchWeatherData = this.fetchWeatherData.bind(this);
 	}
 
 	componentDidMount() {
@@ -28,38 +26,43 @@ export default class Home extends Component {
 
 	// a call to fetch weather data via dark sky
 	fetchWeatherData() {
+		const units = this.props.units;
 		const url = `https://api.darksky.net/forecast/${config.darksky_secret_key}/${this.props.location.geometry.location.lat},${this.props.location.geometry.location.lng}`;
 		$.ajax({
 			url,
 			data: {
 				lang: "en",
-				units: 'si'
+				units
 			},
 			dataType: "jsonp",
 			success : this.props.parseResponse,
-			error : this.weatherError
+			error : this.props.requestTimeout,
+			timeout: 10000
 		});
 	}
 
-	toggleSavedPane() {
-		this.setState({
-			savedPaneOpen: !this.state.savedPaneOpen
-		});
+	selectSavedLocation(e) {
+		this.props.updateLocation(e);
 	}
 
 	// the main render method for the iphone component
 	render() {
 		let arrowTransform = `shrink-6 rotate-${this.props.weather.wind.bearing}`;
 		let loadingClasses = this.props.loading ? style.loading : [style.loading, style.hide].join(' ');
+		let speed_units = this.props.units === "si" ? "MPH" : "KPH";
+		let temp_units = this.props.units === "si" ? "C" : "F";
+		let timeout = !this.props.timeout ? "display:none;" : "";
 
 		return (
 			<div className={style.container}>
-				<Saved isOpen={this.state.savedPaneOpen} toggleSavedPane={this.toggleSavedPane} />
 				<div className={loadingClasses}>
 					<i class="fas fa-spinner fa-pulse fa-2x" style="align-self: center;"/>
 				</div>
 				<Header title={this.props.location.formatted_address} changePanel={this.props.changePanel} toggleOptionsPane={this.toggleSavedPane} />
 				<main>
+					<div class="alert alert-danger" role="alert" style={timeout} onClick={this.fetchWeatherData}>
+						Cannot get weather data right now. <br /> Click here to try again.
+					</div>
 					<aside class={style.glance}>
 						<div class={style.glance_icon}>
 							<i class={this.props.weather.icon} />
@@ -82,16 +85,6 @@ export default class Home extends Component {
 						</div>
 						<div class={style.glance_summary}>{this.props.weather.summary}</div>
 					</aside>
-					<Section title="Temperature" figure_class="fas fa-thermometer-three-quarters">
-						<div className={style.focus}>
-							{this.props.weather.temperature.current}°
-						</div>
-						<div className={style.details}>
-							<div>Feels Like: {this.props.weather.temperature.feelsLike}°</div>
-							<div>Max: {this.props.weather.temperature.max}°</div>
-							<div>Min: {this.props.weather.temperature.min}°</div>
-						</div>
-					</Section>
 					<Section title="Wind" figure_class="fas fa-wind">
 						<div className={style.focus} style="margin-left:-5px;margin-right:5px;">
 							<span class="fa-layers fa-fw">
@@ -100,9 +93,19 @@ export default class Home extends Component {
 							</span>
 						</div>
 						<div className={style.details}>
-							<div>Wind Speed: {this.props.weather.wind.speed}</div>
-							<div>Gust Speed: {this.props.weather.temperature.max}</div>
+							<div>Wind Speed: {this.props.weather.wind.speed} {speed_units}</div>
+							<div>Gust Speed: {this.props.weather.temperature.max} {speed_units}</div>
 							<div>Bearing: {this.props.weather.wind.bearing}° N</div>
+						</div>
+					</Section>
+					<Section title="Temperature" figure_class="fas fa-thermometer-three-quarters">
+						<div className={style.focus}>
+							{this.props.weather.temperature.current}°{temp_units}
+						</div>
+						<div className={style.details}>
+							<div>Feels Like: {this.props.weather.temperature.feelsLike}°{temp_units}</div>
+							<div>Max: {this.props.weather.temperature.max}°{temp_units}</div>
+							<div>Min: {this.props.weather.temperature.min}°{temp_units}</div>
 						</div>
 					</Section>
 					<Section title={this.props.weather.precipitation.type} figure_class="fas fa-tint">
@@ -110,9 +113,9 @@ export default class Home extends Component {
 							{this.props.weather.precipitation.probability}<span style="font-size:smaller;">%</span>
 						</div>
 						<div className={style.details}>
-							<div>Wind Speed: {this.props.weather.precipitation.intensity}</div>
-							<div>Gust Speed: {this.props.weather.temperature.max}</div>
-							<div>Bearing: {this.props.weather.wind.bearing}</div>
+							<div>Intensity: {this.props.weather.precipitation.intensity} in/hour</div>
+							<div>Peak: {this.props.weather.precipitation.max} in/hour</div>
+							<div>Peak time: {this.props.weather.precipitation.maxTime}</div>
 						</div>
 					</Section>
 					<WeekForecast forecast={this.props.weather.week_forecast} convertIcon={this.props.convertIcon} />
@@ -126,8 +129,8 @@ export default class Home extends Component {
 const Header = (props) => {
 	return (
 		<header class={style.home_header}>
-			<div className={style.options} onClick={props.toggleOptionsPane} data-panel-name="list">
-				<i className="fa fa-bars" data-panel-name="list" />
+			<div className={style.options} onClick={props.changePanel} data-panel-name="saved" >
+				<i className="fa fa-bars" data-panel-name="saved" />
 			</div>
 			<div className={style.title}>
 				{props.title}
@@ -196,38 +199,5 @@ const HourlyForecast = (props) => {
 				<i class="fas fa-arrow-right" />
 			</div>
 		</section>
-	);
-};
-
-const Saved = (props) => {
-	let classes = props.isOpen ? style.saved_pane : [style.saved_pane, style.hide_saved].join(' ');
-
-	return (
-		<aside class={classes}>
-			<header class={style.saved_header}>
-				Saved Locations
-				<span onClick={props.toggleSavedPane} style="cursor:pointer;">
-					<i class="fas fa-times" />
-				</span>
-			</header>
-			<div class={style.panel_buttons}>
-				<div class={style.saved_locations}>
-					{config.default_search_results.slice(0,3).map((val) => {
-						return (
-							<div class={style.option} data-location={val.formatted_address} data-lat={val.geometry.location.lat} data-lng={val.geometry.location.lng}>
-								{val.formatted_address}
-							</div>
-						);
-					})}
-					<div class={style.option}>
-						<i class="fas fa-plus" />
-					</div>
-				</div>
-				<div class={style.bottom_buttons}>
-					<div class={style.bottom_option}><i class="fas fa-cog" /></div>
-					<div class={style.bottom_option}>Help</div>
-				</div>
-			</div>
-		</aside>
 	);
 };

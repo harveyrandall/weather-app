@@ -1,0 +1,83 @@
+@import '~style/helpers';
+
+
+.container {
+	background-image: url('../../assets/backgrounds/clear-iphone.jpg');
+	color: @white;
+	width: 414px;
+	height: 736px;
+	text-align: center;
+	padding:5px 15px;
+	margin: 0 auto;
+	transition: all .5s ease-in-out;
+	overflow-y: scroll;
+}
+
+.saved_pane {
+	display:flex;
+	flex-direction: column;
+	position: absolute;
+	overflow:hidden;
+	margin:-5px -15px;
+	width: 414px;
+	height: 736px;
+	background: @grey;
+	z-index:1;
+	font-size:1.5em;
+	transition: all .5s ease-in-out;
+}
+.hide_saved {
+	width:0px;
+	padding:0px;
+	transition: width .5s ease-in-out;
+}
+.saved_header {
+	padding:5px 15px;
+	font-weight: bold;
+	border-bottom: 1px solid #8D8D8D;
+}
+.saved_header > div {
+	height:100%;
+	width:80%;
+	font-weight: bold;
+}
+.saved_header i, .saved_header svg {
+	float:right;
+	height:100%;
+	cursor: pointer;
+}
+
+.panel_buttons {
+	display:flex;
+	flex-direction: column;
+	height:100%;
+	justify-content: space-space-between;
+}
+.saved_locations {
+	width:100%;
+	height:100%;
+	display: flex;
+	flex-direction: column;
+}
+.saved_pane .option, .saved_pane .bottom_option {
+	padding:10px;
+	font-size: 0.75em;
+	width:100%;
+	background: white;
+	border-bottom: 1px solid @grey;
+	color: @grey;
+	cursor:pointer;
+}
+
+.saved_pane .bottom_buttons {
+	display:flex;
+	flex-direction: row;
+	justify-content: space-around;
+}
+.saved_pane .bottom_option:first-child {
+	border-right:1px solid @grey;
+}
+.saved_pane .bottom_option {
+
+	border: none;
+}
