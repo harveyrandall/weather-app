@@ -1,105 +1,188 @@
 // import preact
-import { h, render, Component } from 'preact';
-// import stylesheets for ipad & button
-import style from './style';
-import style_iphone from '../button/style_iphone';
-// import jquery for API calls
-import $ from 'jquery';
-// import the Button component
-import Button from '../button';
+import { h, Component } from 'preact';
+
+import Home from "../home";
+import Outfits from "../outfits";
+import Search from '../search';
+import Settings from '../settings';
+
 import * as config from '../../config.json';
 
 export default class Iphone extends Component {
-//var Iphone = React.createClass({
-
-	// a constructor with initial set states
-	constructor(props){
+	constructor(props) {
 		super(props);
-		// temperature state
-		this.state.temp = "";
-		// button display state
-		this.setState({ display: true });
+		this.state = {
+			loading: true,
+			openPanel: "home",
+			location: {
+				icon: "fas fa-question",
+				formatted_address: config.default_search_results[0].formatted_address,
+				geometry: {
+					location: {
+						lat: config.default_search_results[0].geometry.location.lat,
+						lng: config.default_search_results[0].geometry.location.lng
+					}
+				}
+			},
+			weather: {
+				icon: "fas fa-question",
+				summary: "Clear",
+				sun: {
+					rise: "00:00:00",
+					set: "00:00:00"
+				},
+				temperature: {
+					current: 0,
+					feelsLike: 0,
+					max: 0,
+					min: 0
+				},
+				wind: {
+					bearing: 0,
+					speed: 0,
+					gust_speed: 0
+				},
+				precipitation: {
+					intensity: 0
+				},
+				week_forecast: [],
+				hourly_forecast: []
+			}
+		};
+		this.parseResponse = this.parseResponse.bind(this);
+		this.changePanel = this.changePanel.bind(this);
+		this.updateLocation = this.updateLocation.bind(this);
 	}
 
-	componentDidMount = () => {
-		this.fetchLocation();
-	}
-
-	fetchLocation = () => {
-		$.ajax({
-			url: "https://extreme-ip-lookup.com/json",
-			dataType: "jsonp",
-			success: this.fetchWeatherData,
-			error: this.locationError
+	changePanel(e) {
+		console.log(e);
+		this.setState({
+			openPanel: e.target.dataset['panelName']
 		});
 	}
 
-	// a call to fetch weather data via wunderground
-	fetchWeatherData = (data) => {
-		// API URL with a structure of : ttp://api.wunderground.com/api/key/feature/q/country-code/city.json
-		if(data.lat != this.state.lat || data.lon != this.state.lon) {
-			this.setState({
-				locate: data.city,
-				lat: data.lat,
-				lon: data.lon
-			});
+	updateLocation(newLocation) {
+		this.setState({
+			location: {
+				icon: "fas fa-question",
+				formatted_address: newLocation.target['data-location'],
+				geometry: {
+					location: {
+						lat: config.default_search_results[0].geometry.location.lat,
+						lng: config.default_search_results[0].geometry.location.lng
+					}
+				}
+			}
+		});
+	}
+
+	iconToFAClasses(icon) {
+		switch (icon) {
+			case "clear-day":
+				return "fas fa-sun";
+			case "clear-night":
+				return "fas fa-moon";
+			case "rain":
+				return "fas fa-cloud-rain";
+			case "snow":
+				return "fas fa-snowflake";
+			case "sleet":
+				return "fas fa-cloud-rain";
+			case "wind":
+				return "fas fa-wind";
+			case "fog":
+				return "fas fa-low-vision";
+			case "cloudy":
+				return "fas fa-cloud";
+			case "partly-cloudy-day":
+				return "fas fa-cloud-sun";
+			case "partly-cloudy-night":
+				return "fas fa-cloud-moon";
+			default:
+				return "fas fa-question";
 		}
-		var url = `https://api.darksky.net/forecast/${config.darksky_secret_key}/${this.state.lat},${this.state.lon}`;
-		$.ajax({
-			url: url,
-			data: {
-				lang: "en",
-				units: 'si'
-			},
-			dataType: "jsonp",
-			success : this.parseResponse,
-			error : this.weatherError
-		})
-			// once the data grabbed, hide the button
 	}
 
-	// the main render method for the iphone component
-	render() {
-		// check if temperature data is fetched, if so add the sign styling to the page
-		const tempStyles = this.state.temp ? `${style.temperature} ${style.filled}` : style.temperature;
+	parseResponse(parsed_json) {
+		console.log(parsed_json);
 
-		// display all weather data
-		return (
-			<div class={ style.container }>
-				<div class={ style.header }>
-					<div class={ style.city }>{ this.state.locate }</div>
-					<div class={ style.conditions }>{ this.state.cond }</div>
-					<span class={ tempStyles }>{ this.state.temp }</span>
-				</div>
-				<div class={ style.details }></div>
-				<div class= { style_iphone.container }>
-					{ this.state.display ? <Button class={ style_iphone.button } clickFunction={ this.fetchLocation }/ > : <Button class={style_iphone.button} clickFunction={this.fetchLocation } text='refresh' /> }
-				</div>
-			</div>
-		);
-	}
+		let highlightsIcon = this.iconToFAClasses(parsed_json['daily'].data[0]['icon']);
+		let weather_summary = parsed_json['daily'].data[0]['summary'];
 
-	parseLocation = (data) => {
-		console.log(data);
-	}
+		let sun_rise = new Date(parsed_json['daily'].data[0].sunriseTime * 1000).toLocaleTimeString().slice(0,5);
+		let sun_set = new Date(parsed_json['daily'].data[0].sunsetTime * 1000).toLocaleTimeString().slice(0,5);
 
-	locationError = (req, err) => {
-		console.log("Error getting location");
-	}
+		let current_temp = Math.round(parsed_json['currently']['temperature']);
+		let feelslike_temp = Math.round(parsed_json['currently']['apparentTemperature']);
+		let max_temp = Math.round(parsed_json['daily'].data[0]['apparentTemperatureMax']);
+		let min_temp = Math.round(parsed_json['daily'].data[0]['apparentTemperatureMin']);
 
-	weatherError = (req, err) => {
-		console.log(err);
-	}
+		let wind_bearing = parsed_json['currently']['windBearing'];
+		let wind_speed = parsed_json['currently']['windSpeed'];
+		let wind_gust_speed = parsed_json['currently']['windGust'];
 
-	parseResponse = (parsed_json) => {
-		var temp_c = parsed_json['currently']['temperature'];
-		var conditions = parsed_json['currently']['summary'];
+		let precip_type = parsed_json['currently']['precipType'] ? parsed_json['currently']['precipType'].capitalise() : "Precipitation";
+		let precip_icon = (parsed_json['currently']['precipType'] === "snow") ? "fas fa-snowflake" : "fas fa-tint";
+		let precip_probability = Math.round(parsed_json['currently']['precipProbability'] * 100);
+
+		let week_forecast = parsed_json['daily'].data.slice(1);
+		let hourly_forecast = parsed_json['hourly'].data.slice(0,24);
 
 		// set states for fields so they could be rendered later on
 		this.setState({
-			temp: temp_c,
-			cond : conditions,
-			display: false,
+			loading: false,
+			weather: {
+				icon: highlightsIcon,
+				summary: weather_summary,
+				sun: {
+					rise: sun_rise,
+					set: sun_set
+				},
+				temperature: {
+					current: current_temp,
+					feelsLike: feelslike_temp,
+					max: max_temp,
+					min: min_temp
+				},
+				wind: {
+					bearing: wind_bearing,
+					speed: wind_speed,
+					gust_speed: wind_gust_speed
+				},
+				precipitation: {
+					type: precip_type,
+					icon: precip_icon,
+					probability: precip_probability
+				},
+				week_forecast,
+				hourly_forecast
+			}
 		});
+	}
+
+	weatherError(req, err) {
+		console.log(err);
+	}
+
+	render() {
+		switch (this.state.openPanel) {
+			case "home":
+				return <Home
+							location={this.state.location}
+							weather={this.state.weather}
+							loading={this.state.loading}
+							parseResponse={this.parseResponse}
+							changePanel={this.changePanel}
+							convertIcon={this.iconToFAClasses}
+						/>;
+			case "outfits":
+				return <Outfits />;
+			case "search":
+				return <Search />;
+			case "settings":
+				return <Settings />;
+			default:
+				return <Home weather={this.state.weather} />;
+		}
 	}
 }
