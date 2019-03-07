@@ -63,13 +63,15 @@ export default class Iphone extends Component {
 
 	updateLocation(newLocation) {
 		this.setState({
+			openPanel: 'home',
+			loading: true,
 			location: {
 				icon: "fas fa-question",
-				formatted_address: newLocation.target['data-location'],
+				formatted_address: newLocation.target.dataset.formattedAddress,
 				geometry: {
 					location: {
-						lat: config.default_search_results[0].geometry.location.lat,
-						lng: config.default_search_results[0].geometry.location.lng
+						lat: newLocation.target.dataset.lat,
+						lng: newLocation.target.dataset.lng
 					}
 				}
 			}
@@ -109,8 +111,8 @@ export default class Iphone extends Component {
 		let highlightsIcon = this.iconToFAClasses(parsed_json['daily'].data[0]['icon']);
 		let weather_summary = parsed_json['daily'].data[0]['summary'];
 
-		let sun_rise = new Date(parsed_json['daily'].data[0].sunriseTime * 1000).toLocaleTimeString().slice(0,5);
-		let sun_set = new Date(parsed_json['daily'].data[0].sunsetTime * 1000).toLocaleTimeString().slice(0,5);
+		let sun_rise = new Date((parsed_json['daily'].data[0].sunriseTime * 1000) + (parsed_json.offset * 3600000)).toLocaleTimeString();
+		let sun_set = new Date((parsed_json['daily'].data[0].sunsetTime * 1000) + (parsed_json.offset * 3600000)).toLocaleTimeString();
 
 		let current_temp = Math.round(parsed_json['currently']['temperature']);
 		let feelslike_temp = Math.round(parsed_json['currently']['apparentTemperature']);
@@ -178,7 +180,10 @@ export default class Iphone extends Component {
 			case "outfits":
 				return <Outfits />;
 			case "search":
-				return <Search />;
+				return <Search
+								changePanel={this.changePanel}
+								updateLocation={this.updateLocation}
+							/>;
 			case "settings":
 				return <Settings />;
 			default:

@@ -53,15 +53,15 @@ export default class Search extends Component {
 
 	render() {
 		let results = this.state.searchResults.map((val, index) => {
-			return <Result key={index} handleResultClick={this.handleResultClick} data={val} />;
+			return <Result key={index} handleResultClick={this.props.updateLocation} data={val} />;
 		});
 
 		return (
 			<div class={style.container}>
 				<div class={style.navigation}>
-					<Link className={style.back} href="/">
-						<i class="fas fa-arrow-left" />
-					</Link>
+					<div className={style.back} onClick={this.props.changePanel} data-panel-name="home">
+						<i class="fas fa-arrow-left" data-panel-name="home" />
+					</div>
 					<form name="place-search">
 						<input type="text" class="form-control" name="place" value={this.state.searchQuery} onKeyDown={this.handleKeyDown} onKeyUp={this.handleSearch} placeholder="Search for location..." />
 					</form>
@@ -76,7 +76,8 @@ export default class Search extends Component {
 
 const Result = (props) => {
 	return (
-		<div class={style.result} onClick={props.handleResultClick} data-lng={props.data.geometry.location.lng} data-lat={props.data.geometry.location.lat}>
+		<div class={style.result} onClick={props.handleResultClick}
+		data-formatted-address={props.data.formatted_address} data-lng={props.data.geometry.location.lng} data-lat={props.data.geometry.location.lat}>
 			{props.data.formatted_address}
 		</div>
 	);

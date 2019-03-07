@@ -28,7 +28,7 @@ body {
 
 .container {
 	background-image: url('../../assets/backgrounds/clear-iphone.jpg');
-	color: #fff;
+	color: @white;
 	width: 414px;
 	height: 736px;
 	text-align: center;
@@ -46,9 +46,9 @@ body {
 	position: absolute;
 	overflow:hidden;
 	margin:-5px -15px;
-	width:414px;
-	height:736px;
-	background:#323232;
+	width: 414px;
+	height: 736px;
+	background: @grey;
 	z-index:1;
 	font-size:1.5em;
 	transition: all .5s ease-in-out;
@@ -90,8 +90,8 @@ body {
 	font-size: 0.75em;
 	width:100%;
 	background: white;
-	border-bottom: 1px solid #323232;
-	color: #323232;
+	border-bottom: 1px solid @grey;
+	color: @grey;
 }
 
 .saved_pane .bottom_buttons {
@@ -100,7 +100,7 @@ body {
 	justify-content: space-around;
 }
 .saved_pane .bottom_option:first-child {
-	border-right:1px solid #323232;
+	border-right:1px solid @grey;
 }
 .saved_pane .bottom_option {
 
@@ -110,7 +110,7 @@ body {
 main {
 	display:flex;
 	flex-direction: column;
-	color:white;
+	color: @white;
 }
 
 
@@ -167,7 +167,7 @@ section {
 	min-height:100px;
 	padding:5px;
 	margin-top:10px;
-	color: #5F6C74;
+	color: @dark_grey;
 	background-color: rgba(255,255,255,0.85);
 	border-radius: 6px;
 }
@@ -186,7 +186,7 @@ section .section_content {
 	padding:2px 10px;
 }
 section .section_content .section_title {
-	border-bottom: 1px solid #5F6C74;
+	border-bottom: 1px solid @dark_grey;
 	padding-bottom: 3px;
 }
 
@@ -198,7 +198,7 @@ section .section_body {
 
 /* SUN AND MOON */
 section .section_body .focus {
-	width:35%;
+	width:50%;
 	align-self: center;
 	justify-content: center;
 	text-align: center;
@@ -234,12 +234,14 @@ section .section_body .details {
 	position:absolute;
 	display:flex;
 	align-items: center;
-	height:100px;
-	background: rgba(255,255,255,0.9);
+	height:100%;
+	background: @transparent_white;
 	padding:0px 5px;
-	margin: -5px 355px;
+	right: 0px;
+	margin-top:-5px;
 	border-top-right-radius: 6px;
 	border-bottom-right-radius: 6px;
+
 }
 .forecast_day {
 	display:flex;
@@ -257,39 +259,3 @@ section .section_body .details {
 .forecast_day svg {
 	font-size:2.5em;
 }
-
-/*
-.header {
-	display: block;
-	flex-direction: column;
-	flex: 1;
-}
-.details {
-	flex: 4;
-}
-.city {
-	flex: 1;
-	font-size: 1.7em;
-	font-weight: 400;
-}
-.conditions {
-	flex: 1;
-	font-size: 1em;
-}
-.temperature {
-	flex: 2;
-	margin-top: 0;
-	font-size: 4.8em;
-	font-weight: 300;
-	letter-spacing: -6px;
-}
-.filled:after {
-	content: "°C";
-	margin: 0 0 0 1rem;
-	font-size: 0.5em;
-	font-weight: 100;
-	display: inline-block;
-	padding-top: 10px;
-	vertical-align: top;
-}
-*/

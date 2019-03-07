@@ -51,10 +51,11 @@ export default class Home extends Component {
 	render() {
 		let arrowTransform = `shrink-6 rotate-${this.props.weather.wind.bearing}`;
 		let loadingClasses = this.props.loading ? style.loading : [style.loading, style.hide].join(' ');
+		let saved = this.state.savedPaneOpen ? <Saved toggleSavedPane={this.toggleSavedPane} /> : "";
 
 		return (
 			<div className={style.container}>
-				<Saved isOpen={this.state.savedPaneOpen} toggleSavedPane={this.toggleSavedPane} />
+				{saved}
 				<div className={loadingClasses}>
 					<i class="fas fa-spinner fa-pulse fa-2x" style="align-self: center;"/>
 				</div>
@@ -126,8 +127,8 @@ export default class Home extends Component {
 const Header = (props) => {
 	return (
 		<header class={style.home_header}>
-			<div className={style.options} onClick={props.toggleOptionsPane} data-panel-name="list">
-				<i className="fa fa-bars" data-panel-name="list" />
+			<div className={style.options} onClick={props.toggleOptionsPane}>
+				<i className="fa fa-bars" />
 			</div>
 			<div className={style.title}>
 				{props.title}
@@ -200,10 +201,8 @@ const HourlyForecast = (props) => {
 };
 
 const Saved = (props) => {
-	let classes = props.isOpen ? style.saved_pane : [style.saved_pane, style.hide_saved].join(' ');
-
 	return (
-		<aside class={classes}>
+		<aside class={style.saved_pane}>
 			<header class={style.saved_header}>
 				Saved Locations
 				<span onClick={props.toggleSavedPane} style="cursor:pointer;">
