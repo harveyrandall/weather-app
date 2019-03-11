@@ -6,13 +6,13 @@
     "dev": "cross-env NODE_ENV=development webpack-dev-server --inline --hot --progress",
     "start": "serve build -s -c 1",
     "prestart": "npm run build",
-    "build": "NODE_ENV=production webpack -p --progress",
-    "prebuild": "mkdir -p build && cp -r src/assets build/assets",
+    "build": "cross-env NODE_ENV=production webpack -p --progress",
+    "prebuild": "mkdirp build && ncp src/assets build/assets",
     "test": "npm run -s lint && npm run -s test:karma",
     "test:karma": "karma start test/karma.conf.js --single-run",
     "lint": "eslint {src,test}",
     "heroku-prebuild": "",
-    "heroku-postbuild": "NODE_ENV=production webpack -p --progress"
+    "heroku-postbuild": "cross-env NODE_ENV=production webpack -p --progress"
   },
   "keywords": [
     "preact",
@@ -83,7 +83,11 @@
     "preact-router": "^2.6.1",
     "promise-polyfill": "^6.0.2",
     "proptypes": "^0.14.3",
-    "serve": "^2.0.0"
+    "serve": "^2.0.0",
+    "cross-env": "^3.2.4",
+    "mkdirp": "^0.5.1",
+    "ncp": "^2.0.0",
+    "webpack": "^1.13.2"
   },
   "main": "webpack.config.babel.js",
   "directories": {
