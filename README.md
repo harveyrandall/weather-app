@@ -36,6 +36,9 @@ npm start
 
 
 ## Heroku
+
+Final build version of the app can be found at [https://evening-beyond-50834.herokuapp.com/](https://evening-beyond-50834.herokuapp.com/)
+
 To push to heroku you must keep devDependencies installed by running:
 
 ```sh
