@@ -33,3 +33,25 @@ npm start
 ```
 
 > This simply serves up the contents of `./build`. Bear in mind, if you use this, the localhost port your server is running on will refresh, and you'll also need to restart it to see any changes you've made to the code in `src`.
+
+
+## Heroku
+To push to heroku you must keep devDependencies installed by running:
+
+```sh
+heroku config:set NPM_CONFIG_PRODUCTION=false
+```
+
+In your package.json file you must include the following as well:
+
+```json 
+{
+...
+"scripts": {
+	...
+	"heroku-prebuild": "npm install --dev"
+	...
+}
+...
+}
+```
