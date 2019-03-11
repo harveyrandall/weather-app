@@ -12,7 +12,7 @@
     "test:karma": "karma start test/karma.conf.js --single-run",
     "lint": "eslint {src,test}",
     "heroku-prebuild": "",
-    "heroku-postbuild": "cross-env NODE_ENV=production webpack -p --progress"
+    "heroku-postbuild": "NODE_ENV=production webpack -p --progress"
   },
   "keywords": [
     "preact",
