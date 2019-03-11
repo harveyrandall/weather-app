@@ -55,3 +55,5 @@ In your package.json file you must include the following as well:
 ...
 }
 ```
+
+> More details can be found at [https://devcenter.heroku.com/articles/nodejs-support](https://devcenter.heroku.com/articles/nodejs-support)
