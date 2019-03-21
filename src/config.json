@@ -1,6 +1,6 @@
 {
-	"darksky_secret_key": "248ace5a37fb36dea7b7794e5d8d2bba",
-	"google_maps_key": "AIzaSyBDRhEFgLvfj3y9LdNZhFf0IlBK16aWFSY",
+	"darksky_secret_key": "<SAMPLE>",
+	"google_maps_key": "<SAMPLE>",
 	"default_search_results": [
 		{
 			"formatted_address": "Royal St George's",
