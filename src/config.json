@@ -3,20 +3,101 @@
 	"google_maps_key": "AIzaSyBDRhEFgLvfj3y9LdNZhFf0IlBK16aWFSY",
 	"default_search_results": [
 		{
-			"formatted_address": "London, UK",
+			"formatted_address": "Royal St George's",
 			"geometry": {
 				"location": {
-					"lat": 51.509865,
-					"lng": -0.118092
+					"lat": 51.2737,
+					"lng": 1.3669
 				}
 			}
 		},
 		{
-			"formatted_address": "New York City, New York, USA",
+			"formatted_address": "Sunningdale (Old)",
 			"geometry": {
 				"location": {
-					"lat": 40.730610,
-					"lng": -73.935242
+					"lat": 51.3888,
+					"lng": -0.6314
+				}
+			}
+		},
+		{
+			"formatted_address": "Royal Birkdale",
+			"geometry": {
+				"location": {
+					"lat": 53.6217,
+					"lng": -3.0324
+				}
+			}
+		},
+		{
+			"formatted_address": "Royal Lytham & St Annes",
+			"geometry": {
+				"location": {
+					"lat": 53.7496,
+					"lng": -3.0178
+				}
+			}
+		},
+		{
+			"formatted_address": "Swinley Forest",
+			"geometry": {
+				"location": {
+					"lat": 51.3895,
+					"lng": -0.6771
+				}
+			}
+		},
+		{
+			"formatted_address": "St George's Hill",
+			"geometry": {
+				"location": {
+					"lat": 51.3480,
+					"lng": -0.4492
+				}
+			}
+		},
+		{
+			"formatted_address": "Ganton",
+			"geometry": {
+				"location": {
+					"lat": 54.1903,
+					"lng": -0.4951
+				}
+			}
+		},
+		{
+			"formatted_address": "Woodhall Spa (Hotchkin)",
+			"geometry": {
+				"location": {
+					"lat": 53.1547,
+					"lng": -0.2061
+				}
+			}
+		},
+		{
+			"formatted_address": "Walton Heath (Old)",
+			"geometry": {
+				"location": {
+					"lat": 51.2777,
+					"lng": -0.2433
+				}
+			}
+		},
+		{
+			"formatted_address": "St Enodoc (Church)",
+			"geometry": {
+				"location": {
+					"lat": 50.5469,
+					"lng": -4.9193
+				}
+			}
+		},
+		{
+			"formatted_address": "West Sussex",
+			"geometry": {
+				"location": {
+					"lat": 50.9406,
+					"lng": -0.4774
 				}
 			}
 		},

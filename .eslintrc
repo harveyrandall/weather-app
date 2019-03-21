@@ -10,9 +10,12 @@
     "node": true,
     "mocha": true,
     "es6": true,
-    "jest/globals": true
+    "jest/globals": true,
+    "jest": true
   },
   "parserOptions": {
+    "ecmaVersion": 6,
+    "sourceType": "module",
     "ecmaFeatures": {
       "modules": true,
       "jsx": true

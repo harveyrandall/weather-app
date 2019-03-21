@@ -7,10 +7,12 @@
     "start": "serve build -s -c 1",
     "prestart": "npm run build",
     "build": "cross-env NODE_ENV=production webpack -p --progress",
-    "prebuild": "mkdirp build && ncp src/assets build/assets",
+    "prebuild": "mkdir -p build && cp -r src/assets build/assets",
     "test": "npm run -s lint && npm run -s test:karma",
     "test:karma": "karma start test/karma.conf.js --single-run",
-    "lint": "eslint {src,test}"
+    "lint": "eslint {src,test}",
+    "heroku-prebuild": "npm install --dev",
+    "heroku-postbuild": "npm run build"
   },
   "keywords": [
     "preact",
@@ -38,6 +40,8 @@
     "css-loader": "^0.26.1",
     "eslint": "^3.0.1",
     "eslint-config-standard-preact": "^1.1.6",
+    "eslint-plugin-jest": "^22.3.0",
+    "eslint-plugin-react": "^7.12.4",
     "extract-text-webpack-plugin": "^1.0.1",
     "file-loader": "^0.9.0",
     "html-webpack-plugin": "^2.22.0",

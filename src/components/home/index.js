@@ -1,16 +1,14 @@
 // import preact
-import { h, render, Component } from 'preact';
-import { Router, Route, Link } from 'preact-router';
+import { h, Component } from 'preact';
 // import stylesheets for ipad & button
 import style from './style';
-import style_iphone from '../button/style_iphone';
 // import jquery for API calls
 import $ from 'jquery';
-// import the Button component
-import Button from '../button';
 import * as config from '../../config.json';
-import Search from '../search';
 
+String.prototype.capitalise = function() {
+	return this.charAt(0).toUpperCase() + this.slice(1);
+};
 
 export default class Home extends Component {
 //var Iphone = React.createClass({
@@ -18,97 +16,188 @@ export default class Home extends Component {
 	// a constructor with initial set states
 	constructor(props){
 		super(props);
-		this.setState({
-			loading: true
-		});
+		this.selectSavedLocation = this.selectSavedLocation.bind(this);
+		this.fetchWeatherData = this.fetchWeatherData.bind(this);
 	}
 
-	componentDidMount = () => {
-		this.fetchLocation();
+	componentDidMount() {
+		this.fetchWeatherData();
 	}
 
-	fetchLocation = () => {
+	// a call to fetch weather data via dark sky
+	fetchWeatherData() {
+		const units = this.props.units;
+		const url = `https://api.darksky.net/forecast/${config.darksky_secret_key}/${this.props.location.geometry.location.lat},${this.props.location.geometry.location.lng}`;
 		$.ajax({
-			url: "https://extreme-ip-lookup.com/json",
-			dataType: "jsonp",
-			success: this.fetchWeatherData,
-			error: this.locationError
-		});
-	}
-
-	// a call to fetch weather data via wunderground
-	fetchWeatherData = (data) => {
-		// API URL with a structure of : ttp://api.wunderground.com/api/key/feature/q/country-code/city.json
-		if(data.lat != this.state.lat || data.lon != this.state.lon) {
-			this.setState({
-				locate: data.city,
-				lat: data.lat,
-				lon: data.lon,
-				loading: false
-			});
-		}
-		var url = `https://api.darksky.net/forecast/${config.darksky_secret_key}/${this.state.lat},${this.state.lon}`;
-		$.ajax({
-			url: url,
+			url,
 			data: {
 				lang: "en",
-				units: 'si'
+				units
 			},
 			dataType: "jsonp",
-			success : this.parseResponse,
-			error : this.weatherError
-		})
-			// once the data grabbed, hide the button
+			success : this.props.parseResponse,
+			error : this.props.requestTimeout,
+			timeout: 10000
+		});
+	}
+
+	selectSavedLocation(e) {
+		this.props.updateLocation(e);
 	}
 
 	// the main render method for the iphone component
 	render() {
-		let loading = undefined;
-		if (this.state.loading) {
-			loading = <div class={style.loading}><i class="fas fa-spinner fa-pulse"></i></div>;
-		}
-		// check if temperature data is fetched, if so add the sign styling to the page
-		const tempStyles = this.state.temp ? `${style.temperature} ${style.filled}` : style.temperature;
+		let arrowTransform = `shrink-6 rotate-${this.props.weather.wind.bearing}`;
+		let loadingClasses = this.props.loading ? style.loading : [style.loading, style.hide].join(' ');
+		let speed_units = this.props.units === "si" ? "MPH" : "KPH";
+		let temp_units = this.props.units === "si" ? "C" : "F";
+		let timeout = !this.props.timeout ? "display:none;" : "";
 
-		// display all weather data
 		return (
-			<div class={ style.container }>
-				{loading}
-				<div class={ style.header }>
-					<Link href="/search">Search</Link>
-					<div class={ style.city }>{ this.state.locate }</div>
-					<div class={ style.conditions }>{ this.state.cond }</div>
-					<span class={ tempStyles }>{ this.state.temp }</span>
+			<div className={style.container}>
+				<div className={loadingClasses}>
+					<i class="fas fa-spinner fa-pulse fa-2x" style="align-self: center;"/>
 				</div>
-				<div class={ style.details }></div>
-				<div class= { style_iphone.container }>
-					{ this.state.display ? <Button class={ style_iphone.button } clickFunction={ this.fetchLocation }/ > : <Button class={style_iphone.button} clickFunction={this.fetchLocation } text='refresh' /> }
-				</div>
+				<Header title={this.props.location.formatted_address} changePanel={this.props.changePanel} toggleOptionsPane={this.toggleSavedPane} />
+				<main>
+					<div class="alert alert-danger" role="alert" style={timeout} onClick={this.fetchWeatherData}>
+						Cannot get weather data right now. <br /> Click here to try again.
+					</div>
+					<aside class={style.glance}>
+						<div class={style.glance_icon}>
+							<i class={this.props.weather.icon} />
+						</div>
+						<div class={style.glance_sun}>
+							<p>
+								<span class="fa-layers fa-fw" style="font-size:30pt; vertical-align: middle;">
+									<i class="fas fa-sun" data-fa-transform="shrink-6" />
+									<i class="fas fa-arrow-up" data-fa-transform="shrink-12 up-8" />
+								</span>
+								{this.props.weather.sun.rise}
+							</p>
+							<p>
+								<span class="fa-layers fa-fw" style="font-size:30pt; vertical-align: middle;">
+									<i class="fas fa-sun" data-fa-transform="shrink-6" />
+									<i class="fas fa-arrow-down" data-fa-transform="shrink-12 up-8" />
+								</span>
+								{this.props.weather.sun.set}
+							</p>
+						</div>
+						<div class={style.glance_summary}>{this.props.weather.summary}</div>
+					</aside>
+					<Section title="Wind" figure_class="fas fa-wind">
+						<div className={style.focus} style="margin-left:-5px;margin-right:5px;">
+							<span class="fa-layers fa-fw">
+								<i class="fas fa-circle" style="color:#5F6C74" />
+								<i class="fa-inverse fas fa-arrow-up" data-fa-transform={arrowTransform} />
+							</span>
+						</div>
+						<div className={style.details}>
+							<div>Wind Speed: {this.props.weather.wind.speed} {speed_units}</div>
+							<div>Gust Speed: {this.props.weather.temperature.max} {speed_units}</div>
+							<div>Bearing: {this.props.weather.wind.bearing}° N</div>
+						</div>
+					</Section>
+					<Section title="Temperature" figure_class="fas fa-thermometer-three-quarters">
+						<div className={style.focus}>
+							{this.props.weather.temperature.current}°{temp_units}
+						</div>
+						<div className={style.details}>
+							<div>Feels Like: {this.props.weather.temperature.feelsLike}°{temp_units}</div>
+							<div>Max: {this.props.weather.temperature.max}°{temp_units}</div>
+							<div>Min: {this.props.weather.temperature.min}°{temp_units}</div>
+						</div>
+					</Section>
+					<Section title={this.props.weather.precipitation.type} figure_class="fas fa-tint">
+						<div className={style.focus}>
+							{this.props.weather.precipitation.probability}<span style="font-size:smaller;">%</span>
+						</div>
+						<div className={style.details}>
+							<div>Intensity: {this.props.weather.precipitation.intensity} in/hour</div>
+							<div>Peak: {this.props.weather.precipitation.max} in/hour</div>
+							<div>Peak time: {this.props.weather.precipitation.maxTime}</div>
+						</div>
+					</Section>
+					<WeekForecast forecast={this.props.weather.week_forecast} convertIcon={this.props.convertIcon} />
+					<HourlyForecast forecast={this.props.weather.hourly_forecast} convertIcon={this.props.convertIcon} />
+				</main>
 			</div>
 		);
 	}
-
-	parseLocation = (data) => {
-		console.log(data);
-	}
-
-	locationError = (req, err) => {
-		console.log("Error getting location");
-	}
-
-	weatherError = (req, err) => {
-		console.log(err);
-	}
-
-	parseResponse = (parsed_json) => {
-		let temp_c = parsed_json['currently']['temperature'];
-		let conditions = parsed_json['currently']['summary'];
-
-		// set states for fields so they could be rendered later on
-		this.setState({
-			temp: temp_c,
-			cond : conditions,
-			display: false
-		});
-	}
 }
+
+const Header = (props) => {
+	return (
+		<header class={style.home_header}>
+			<div className={style.options} onClick={props.changePanel} data-panel-name="saved" >
+				<i className="fa fa-bars" data-panel-name="saved" />
+			</div>
+			<div className={style.title}>
+				{props.title}
+			</div>
+			<div className={style.add} onClick={props.changePanel} data-panel-name="search">
+				<i className="fa fa-search" data-panel-name="search" />
+			</div>
+		</header>
+	);
+};
+
+const Section = (props) => {
+	return (
+		<section>
+			<div className={style.section_figure}>
+				<i className={props.figure_class} />
+			</div>
+			<div className={style.section_content}>
+				<h5 className={style.section_title}>{props.title}</h5>
+				<div className={style.section_body}>
+					{props.children}
+				</div>
+			</div>
+		</section>
+	);
+};
+
+const WeekForecast = (props) => {
+	props.forecast.map((val) => {
+		val.icon = props.convertIcon(val.icon);
+	});
+	return (
+		<section className={style.week_forecast}>
+			<div class={style.days}>
+				{props.forecast.map((val) => {
+					return (<div className={style.forecast_day}>
+						<h6>{new Date(val.time * 1000).toGMTString().slice(0,3)}</h6>
+						<i class={val.icon} />
+						{val.apparentTemperatureMax}°
+					</div>);
+				})}
+			</div>
+			<div class={style.more}>
+				<i class="fas fa-arrow-right" />
+			</div>
+		</section>
+	);
+};
+
+const HourlyForecast = (props) => {
+	props.forecast.map((val) => {
+		val.icon = props.convertIcon(val.icon);
+	});
+	return (
+		<section className={style.week_forecast}>
+			<div class={style.days}>
+				{props.forecast.map((val) => {
+					return (<div className={style.forecast_day}>
+						<h6>{new Date(val.time * 1000).toGMTString().slice(17,22)}</h6>
+						<i class={val.icon} />
+						{val.temperature}°
+					</div>);
+				})}
+			</div>
+			<div class={style.more}>
+				<i class="fas fa-arrow-right" />
+			</div>
+		</section>
+	);
+};
