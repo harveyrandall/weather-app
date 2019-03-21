@@ -14,7 +14,7 @@ npm -v
 **1. Clone this repository :**
 
 ```sh
-git clone https://github.research.its.qmul.ac.uk/ec16183/WeatherApp weather-app
+git clone https://github.com/harveyrandall/weather-app weather-app
 cd weather-app
 ```
 
